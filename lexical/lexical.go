@@ -8,8 +8,10 @@ import (
 
 func (data Data) SearchKeyWord(name string) types.TToken {
 	token := (types.TToken)(sort.Search(len(data.ReservedWords), func(i int) bool { return strings.Compare(data.ReservedWords[i], name) > -1 }))
-	if data.ReservedWords[token] != name {
-		token = types.ID
+	if (int)(token) == len(data.ReservedWords) {
+		return types.ID
+	} else if data.ReservedWords[token] != name {
+		return types.ID
 	}
 	return token
 }

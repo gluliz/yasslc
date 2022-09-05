@@ -70,6 +70,7 @@ func (data Data) NextToken() types.TToken {
 			text += (string)(nextChar)
 			nextChar = data.readChar()
 		}
+		nextChar = data.readChar()
 		token = types.STRINGVAL
 		secundaryToken = data.AddStringConst(text)
 	} else {
