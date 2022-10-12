@@ -23,8 +23,6 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
-	b := new([]byte)
-	fmt.Println(f.Read(*b))
 	defer f.Close()
 	data := lexical.Data{F: f, ReservedWords: ReservedWords, SecundaryTokens: SecundaryTokens, NNumSecTokens: &NNumSecTokens, NNumConsts: &NNumConsts, VConsts: &VConsts, Tokens: &Tokens}
 	syntactic := syntactic.Syntactic{Lexical: data}

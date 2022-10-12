@@ -52,7 +52,7 @@ func ConvertToToken(nonTerminal string, actionTable *[][]string) int {
 	return -1
 }
 
-var actionHeader = []types.TToken{types.NOT, types.NOT_EQUAL, types.AND, types.LEFT_PARENTHESIS, types.RIGHT_PARENTHESIS, types.TIMES, types.PLUS, types.PLUS_PLUS, types.COMMA, types.MINUS, types.MINUS_MINUS, types.DOT, types.DIVIDE, types.COLON, types.SEMI_COLON, types.LESS_THAN, types.LESS_OR_EQUAL, types.EQUALS, types.EQUAL_EQUAL, types.GREATER_THAN, types.GREATER_OR_EQUAL, types.LEFT_SQUARE, types.RIGHT_SQUARE, types.ARRAY, types.BOOLEAN, types.BREAK, types.CHARACTER, types.CHAR, types.CONTINUE, types.DO, types.ELSE, types.FUNCTION, types.ID, types.IF, types.INTEGER, types.NUMERAL, types.OF, types.STRINGVAL, types.STRING, types.STRUCT, types.TRUE, types.TYPE, types.VAR, types.WHILE, types.LEFT_BRACES, types.OR, types.RIGHT_BRACES, types.EOF}
+var actionHeader = []types.TToken{types.NOT, types.NOT_EQUAL, types.AND, types.LEFT_PARENTHESIS, types.RIGHT_PARENTHESIS, types.TIMES, types.PLUS, types.PLUS_PLUS, types.COMMA, types.MINUS, types.MINUS_MINUS, types.DOT, types.DIVIDE, types.COLON, types.SEMI_COLON, types.LESS_THAN, types.LESS_OR_EQUAL, types.EQUALS, types.EQUAL_EQUAL, types.GREATER_THAN, types.GREATER_OR_EQUAL, types.LEFT_SQUARE, types.RIGHT_SQUARE, types.ARRAY, types.BOOLEAN, types.BREAK, types.CHARACTER, types.CHAR, types.CONTINUE, types.DO, types.ELSE, types.FALSE, types.FUNCTION, types.ID, types.IF, types.INTEGER, types.NUMERAL, types.OF, types.STRINGVAL, types.STRING, types.STRUCT, types.TRUE, types.TYPE, types.VAR, types.WHILE, types.LEFT_BRACES, types.OR, types.RIGHT_BRACES, types.EOF}
 
 func ConvertTokenToPosition(token types.TToken) int {
 	for i, v := range actionHeader {
@@ -71,7 +71,8 @@ func (synt Syntactic) SyntacticAnalysis() error {
 	stack.Push(0)
 	a := synt.Lexical.NextToken()
 	for q != final {
-		p, _ := strconv.Atoi(action[q+1][ConvertTokenToPosition(a)])
+		col := ConvertTokenToPosition(a)
+		p, _ := strconv.Atoi(action[q+1][col])
 		if IsShift(p) {
 			stack.Push(p)
 			a = synt.Lexical.NextToken()
