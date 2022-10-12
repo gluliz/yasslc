@@ -19,6 +19,7 @@ type Data struct {
 
 func (data Data) readChar() rune {
 	b := make([]byte, 1)
+	data.F.Read(b)
 	return (rune)(b[0])
 }
 
