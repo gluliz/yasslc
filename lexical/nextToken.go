@@ -168,6 +168,8 @@ func (data Data) NextToken() types.TToken {
 			} else {
 				token = types.NOT
 			}
+		case '\000':
+			token = types.EOF
 		default:
 			token = types.UNKNOWN
 		}

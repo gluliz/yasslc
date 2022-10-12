@@ -85,7 +85,7 @@ func (synt Syntactic) SyntacticAnalysis() error {
 			}
 			// It only works for non terminals
 			leftSideToken := ConvertToToken(lenLeft[r][1], &action)
-			nextItem, _ := strconv.Atoi(action[stack.Top()][leftSideToken])
+			nextItem, _ := strconv.Atoi(action[stack.Top()+1][leftSideToken])
 			stack.Push(nextItem)
 		} else {
 			return errors.New("Syntax error")
