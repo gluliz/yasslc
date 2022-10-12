@@ -9,12 +9,3 @@ function main(arg:integer):integer
     z = x + y;
     z = 2 * (z - 3) / 5;
 }
-
-E -> E ‘+’ T
-| T
-T -> T ‘*’ F
-| F
-F -> ’(‘ E ‘)’
-| ID
-
-a*(b+c)$

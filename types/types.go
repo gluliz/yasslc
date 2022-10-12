@@ -56,6 +56,7 @@ const (
 	ID
 	// unknown token
 	UNKNOWN
+	EOF
 )
 
 type TConst struct {
@@ -87,4 +88,9 @@ func (s *Stack) Pop() (int, bool) {
 		*s = (*s)[:index]      // Remove it from the stack by slicing it off.
 		return element, true
 	}
+}
+
+// Get the top most element
+func (s *Stack) Top() int {
+	return (*s)[len(*s)-1]
 }

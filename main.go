@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"yasslc/lexical"
@@ -18,19 +19,20 @@ var NNumConsts = 0
 var Tokens []types.TToken
 
 func main() {
-	f, err := os.Open(os.Args[1])
+	f, err := os.Open("/home/limar/yasslc/input.ss")
 	if err != nil {
 		log.Println(err)
 	}
+	b := new([]byte)
+	fmt.Println(f.Read(*b))
 	defer f.Close()
 	data := lexical.Data{F: f, ReservedWords: ReservedWords, SecundaryTokens: SecundaryTokens, NNumSecTokens: &NNumSecTokens, NNumConsts: &NNumConsts, VConsts: &VConsts, Tokens: &Tokens}
 	syntactic := syntactic.Syntactic{Lexical: data}
-	syntactic.SyntacticAnalysis()
-	/*
-		f1, _ := os.Create("output")
-		w := bufio.NewWriter(f1)
-		fmt.Fprintf(w, "TOKENS: %v\nTokens Secundarios: %v\nVconsts: %v", Tokens, SecundaryTokens, VConsts)
-		w.Flush()
-		defer f1.Close()
-	*/
+	err = syntactic.SyntacticAnalysis()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("Everything is fine :)")
+
 }
