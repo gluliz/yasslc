@@ -1,11 +1,10 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"yasslc/lexical"
+	"yasslc/syntactic"
 	"yasslc/types"
 )
 
@@ -23,12 +22,15 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
-	data := lexical.Data{F: f, ReservedWords: ReservedWords, SecundaryTokens: SecundaryTokens, NNumSecTokens: &NNumSecTokens, NNumConsts: &NNumConsts, VConsts: &VConsts, Tokens: &Tokens}
-	data.Parser()
 	defer f.Close()
-	f1, _ := os.Create("output")
-	w := bufio.NewWriter(f1)
-	fmt.Fprintf(w, "TOKENS: %v\nTokens Secundarios: %v\nVconsts: %v", Tokens, SecundaryTokens, VConsts)
-	w.Flush()
-	defer f1.Close()
+	data := lexical.Data{F: f, ReservedWords: ReservedWords, SecundaryTokens: SecundaryTokens, NNumSecTokens: &NNumSecTokens, NNumConsts: &NNumConsts, VConsts: &VConsts, Tokens: &Tokens}
+	syntactic := syntactic.Syntactic{Lexical: data}
+	syntactic.SyntacticAnalysis()
+	/*
+		f1, _ := os.Create("output")
+		w := bufio.NewWriter(f1)
+		fmt.Fprintf(w, "TOKENS: %v\nTokens Secundarios: %v\nVconsts: %v", Tokens, SecundaryTokens, VConsts)
+		w.Flush()
+		defer f1.Close()
+	*/
 }

@@ -1,8 +1,6 @@
 package lexical
 
 import (
-	"errors"
-	"io"
 	"os"
 	"strconv"
 	"unicode"
@@ -19,21 +17,9 @@ type Data struct {
 	VConsts         *[]types.TConst
 }
 
-var stop = false
-
 func (data Data) readChar() rune {
 	b := make([]byte, 1)
-	_, err := data.F.Read(b)
-	if errors.Is(err, io.EOF) {
-		stop = true
-	}
 	return (rune)(b[0])
-}
-
-func (data Data) Parser() {
-	for !stop {
-		*data.Tokens = append(*data.Tokens, data.NextToken())
-	}
 }
 
 var nextChar rune = ' '
