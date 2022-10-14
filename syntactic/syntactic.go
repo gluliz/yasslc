@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"yasslc/lexical"
+	"yasslc/semantic"
 	"yasslc/types"
 )
 
@@ -89,13 +90,13 @@ func (synt Syntactic) SyntacticAnalysis() error {
 			}
 			// It only works for non terminals
 			leftSideToken := ConvertToToken(lenLeft[r][1], &action)
-			nextItem, _ := strconv.Atoi(action[stack.Top()+1][leftSideToken])
+			nextItem, _ := strconv.Atoi(action[stack.Top().(int)+1][leftSideToken])
 			stack.Push(nextItem)
-			Semantics(r)
+			semantic.Semantics(r)
 		} else {
 			return errors.New("Syntax error")
 		}
-		q = stack.Top()
+		q = stack.Top().(int)
 	}
 	return nil
 }

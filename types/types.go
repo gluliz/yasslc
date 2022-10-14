@@ -90,6 +90,8 @@ const (
 	S_
 	P_
 	Y_
+	ID_
+	NF_
 )
 
 type TRule int
@@ -125,6 +127,58 @@ const (
 	F_12
 	F_13
 	FALSE_0
+	ID_0
+	IDD_0
+	IDU_0
+	L_0
+	L_1
+	L_2
+	L_3
+	L_4
+	L_5
+	L_6
+	LDE_0
+	LDE_1
+	LDV_0
+	LDV_1
+	LE_0
+	LE_1
+	LI_0
+	LI_1
+	LP_0
+	LP_1
+	LS_0
+	LS_1
+	LV_0
+	LV_1
+	LV_2
+	MC_0
+	MF_0
+	NB_0
+	NF_0
+	NUM_0
+	P_0
+	R_0
+	R_1
+	R_2
+	S_0
+	S_1
+	S_2
+	S_3
+	S_4
+	S_5
+	S_6
+	S_7
+	STR_0
+	T_0
+	T_1
+	T_2
+	T_3
+	T_4
+	TRUE_0
+	Y_0
+	Y_1
+	Y_2
 )
 
 type TConst struct {
@@ -134,31 +188,97 @@ type TConst struct {
 	SVal      string
 }
 
-type Stack []int
-
-// IsEmpty: check if stack is empty
-func (s *Stack) IsEmpty() bool {
-	return len(*s) == 0
-}
-
-// Push a new value onto the stack
-func (s *Stack) Push(i int) {
-	*s = append(*s, i) // Simply append the new value to the end of the stack
-}
-
-// Remove and return top element of stack. Return false if stack is empty.
-func (s *Stack) Pop() (int, bool) {
-	if s.IsEmpty() {
-		return 0, false
-	} else {
-		index := len(*s) - 1   // Get the index of the top most element.
-		element := (*s)[index] // Index into the slice and obtain the element.
-		*s = (*s)[:index]      // Remove it from the stack by slicing it off.
-		return element, true
+type TObject struct {
+	NName             int
+	PNext             *TObject
+	Kind              TKind
+	Var, Param, Field struct {
+		PType  *TObject
+		NIndex int
+		NSize  int
+	}
+	Function struct {
+		PParams  *TObject
+		PRetType *TObject
+		NIndex   int
+		NParams  int
+		NVars    int
+	}
+	Array struct {
+		PElemType *TObject
+		NNumElems int
+		NSize     int
+	}
+	Struct struct {
+		PFields *TObject
+		NSize   int
+	}
+	Alias, Type struct {
+		PBaseType *TObject
+		NSize     int
 	}
 }
 
-// Get the top most element
-func (s *Stack) Top() int {
-	return (*s)[len(*s)-1]
+type TAttrib struct {
+	TypeNonTerminal TNonT
+	NSize           int
+	ID              struct {
+		Obj  *TObject
+		Name int
+	}
+	T, E, L, R, Y, F, LV struct {
+		Type *TObject
+	}
+	MC struct {
+		Type  *TObject
+		Param *TObject
+		Err   int
+	}
+	MT, ME, MW, MA struct {
+		Label int
+	}
+	LE struct {
+		Type  *TObject
+		Param *TObject
+		Rrr   int
+		N     int
+	}
+	LI, DC, LP struct {
+		List *TObject
+	}
+
+	TRUE, FALSE struct {
+		Type *TObject
+		Val  int
+	}
+	CHR struct {
+		Type *TObject
+		Val  *byte
+		Pos  int
+	}
+	STR struct {
+		Type *TObject
+		Val  *byte
+		Pos  int
+	}
+	NUM struct {
+		Type *TObject
+		Val  int
+		Pos  int
+	}
 }
+
+type TKind int
+
+const (
+	NO_KIND_DEF TKind = iota - 1
+	VAR_
+	PARAM_
+	FUNCTION_
+	FIELD_
+	ARRAY_TYPE_
+	STRUCT_TYPE_
+	ALIAS_TYPE_
+	SCALAR_TYPE_
+	UNIVERSAL_
+)

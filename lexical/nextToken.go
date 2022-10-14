@@ -25,7 +25,7 @@ func (data Data) readChar() rune {
 
 var nextChar rune = ' '
 var token types.TToken
-var secundaryToken int
+var SecundaryToken int
 
 func (data Data) NextToken() types.TToken {
 	for unicode.IsSpace(nextChar) {
@@ -39,7 +39,7 @@ func (data Data) NextToken() types.TToken {
 		}
 		token = data.SearchKeyWord(text)
 		if token == types.ID {
-			secundaryToken = data.SearchName(text)
+			SecundaryToken = data.SearchName(text)
 		}
 	} else if unicode.IsDigit(nextChar) {
 		numeral := ""
@@ -49,7 +49,7 @@ func (data Data) NextToken() types.TToken {
 		}
 		token = types.NUMERAL
 		num, _ := strconv.Atoi(numeral)
-		secundaryToken = data.AddIntConst(num)
+		SecundaryToken = data.AddIntConst(num)
 	} else if nextChar == '"' {
 		text := ""
 		nextChar = data.readChar()
@@ -59,13 +59,13 @@ func (data Data) NextToken() types.TToken {
 		}
 		nextChar = data.readChar()
 		token = types.STRINGVAL
-		secundaryToken = data.AddStringConst(text)
+		SecundaryToken = data.AddStringConst(text)
 	} else {
 		switch nextChar {
 		case '\'':
 			nextChar = data.readChar()
 			token = types.CHARACTER
-			secundaryToken = data.AddCharConst((byte)(nextChar))
+			SecundaryToken = data.AddCharConst((byte)(nextChar))
 			nextChar = data.readChar()
 			nextChar = data.readChar()
 		case ':':

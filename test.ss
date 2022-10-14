@@ -1,3 +1,4 @@
+teste = "ola"
 function main(arg:integer):integer
 {
 	var x:integer;
