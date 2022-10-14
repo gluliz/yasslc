@@ -258,7 +258,7 @@ type TAttrib struct {
 	}
 	STR struct {
 		Type *TObject
-		Val  *byte
+		Val  string
 		Pos  int
 	}
 	NUM struct {

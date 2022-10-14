@@ -21,8 +21,10 @@ var (
 
 func Semantics(rule types.TRule) error {
 	var (
-		IDD, IDU, ID, T, LI, LI0, LI1, TRUE, FALSE, STR, CHR, NUM, DC, DC0, DC1, LP, LP0, LP1, E, E0, E1, L, L0, L1, R, R0, R1, Y, Y0, Y1, F, F0, F1, LV, LV0, LV1, MC, LE, LE0, LE1, MT, ME, MW, NB types.TAttrib
+		IDD, IDU, ID, T, LI, LI0, LI1, TRUE, FALSE, CHR, E1, STR, NUM, DC, DC0, DC1, LP, LP0, LP1, E, E0, L, L0, L1, R, R0, R1, Y, Y0, Y1, F, F0, F1, LV, LV0, LV1, MC, LE, LE0, LE1, MF types.TAttrib
 	)
+	//
+	//MT, ME, MW, NB
 
 	switch rule {
 	case types.LDE_0:
@@ -206,13 +208,13 @@ func Semantics(rule types.TRule) error {
 	case types.LS_1:
 		return nil
 	case types.DV_0:
-		//TODO
+		// TODO
 		T = stack.Top().(types.TAttrib)
-		t := T.T.Type
+		//t := T.T.Type
 		stack.Pop()
 		LI = stack.Top().(types.TAttrib)
 		stack.Pop()
-		p := LI.LI.List
+		//p := LI.LI.List
 
 	case types.LI_0:
 		IDD = stack.Top().(types.TAttrib)
@@ -229,7 +231,8 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		stack.Push(LI)
 	case types.S_0:
-		MT = stack.Top().(types.TAttrib)
+		// TODO: replace _ by MT for code generation purposes
+		_ = stack.Top().(types.TAttrib)
 		stack.Pop()
 		E = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -240,7 +243,7 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
-		t := LV.LV.Type
+		//t := LV.LV.Type
 	case types.S_6:
 	case types.S_7:
 		return nil
@@ -259,7 +262,7 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		E0.E.Type = scope.PBool
 		E0.TypeNonTerminal = types.E_
-		stack.Push(E0)
+		stack.Push(E1)
 	case types.E_2:
 		L = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -373,28 +376,28 @@ func Semantics(rule types.TRule) error {
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
 
-		n := LV.LV.Type.Type.NSize
+		//n := LV.LV.Type.Type.NSize
 		F.F.Type = LV.LV.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_1:
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
-		t := LV.LV.Type
+		//t := LV.LV.Type
 		F.F.Type = scope.PInt
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_2:
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
-		t := LV.LV.Type
+		//t := LV.LV.Type
 		F.F.Type = LV.LV.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_3:
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
-		t := LV.LV.Type
+		//t := LV.LV.Type
 		F.F.Type = LV.LV.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
@@ -420,7 +423,7 @@ func Semantics(rule types.TRule) error {
 		IDU = stack.Top().(types.TAttrib)
 		stack.Top()
 
-		f := IDU.ID.Obj
+		//f := IDU.ID.Obj
 		F.F.Type = MC.MC.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
@@ -571,7 +574,7 @@ func Semantics(rule types.TRule) error {
 		IDU = stack.Top().(types.TAttrib)
 		stack.Pop()
 
-		p = IDU.ID.Obj
+		p := IDU.ID.Obj
 		if p.Kind != types.VAR_ && p.Kind != types.PARAM_ {
 			if p.Kind != types.UNIVERSAL_ {
 				//Error(ERR_KIND_NOT_VAR);
@@ -580,11 +583,10 @@ func Semantics(rule types.TRule) error {
 		} else {
 			LV.LV.Type = p.Var.PType
 			LV.LV.Type.Type.NSize = p.Var.NSize
-			fprintf(out, "\tLOAD_REF %d\n", p.Var.NIndex)
 		}
-		LV.Type = LV
+		LV.TypeNonTerminal = types.LV_
 
-		t = LV.LV.Type
+		//t := LV.LV.Type
 		stack.Push(LV)
 
 	case types.NB_0:
@@ -615,6 +617,7 @@ func Semantics(rule types.TRule) error {
 		f.Function.NParams = LP.NSize
 		f.Function.NVars = 0
 		CurrentFunction = f
+		stack.Push(MF)
 
 	case types.MC_0:
 		//IDU := stack.Top().(types.TAttrib)
@@ -626,20 +629,23 @@ func Semantics(rule types.TRule) error {
 		IDD.ID.Name = name
 		p := scope.Search(name)
 		if (p) != nil {
-			errors.New("Variable already declared")
+			return errors.New("Variable already declared")
 		} else {
 			p = scope.Define(name)
 		}
 		IDD.ID.Obj = p
+		stack.Push(IDD)
+
 	case types.IDU_0:
 		name := lexical.SecundaryToken
 		IDU.ID.Name = name
 		p := scope.Find(name)
 		if (p) == nil {
-			errors.New("Variable not declared")
 			p = scope.Define(name)
+			return errors.New("Variable not declared")
 		}
 		IDU.ID.Obj = p
+		stack.Push(IDU)
 	case types.ID_0:
 		name := lexical.SecundaryToken
 		ID.ID.Name = name
@@ -657,18 +663,18 @@ func Semantics(rule types.TRule) error {
 		stack.Push(FALSE)
 
 	case types.CHR_0:
-		STR.STR.Pos = lexical.SecundaryToken
-		//STR.STR.Val = *(Data.LexicalData).VConsts[lexical.SecundaryToken]
+		CHR.CHR.Pos = lexical.SecundaryToken
+		CHR.CHR.Val = &(*Data.LexicalData.VConsts)[lexical.SecundaryToken].CVal
 		stack.Push(STR)
 
 	case types.STR_0:
 		STR.STR.Pos = lexical.SecundaryToken
-		//STR.STR.Val = *(Data.LexicalData).VConsts[lexical.SecundaryToken]
+		STR.STR.Val = (*Data.LexicalData.VConsts)[lexical.SecundaryToken].SVal
 		stack.Push(NUM)
 
 	case types.NUM_0:
 		NUM.NUM.Pos = lexical.SecundaryToken
-		//NUM.NUM.Val = *(Semantic.LexicalData).NNumConsts[lexical.SecundaryToken]
+		NUM.NUM.Val = (*Data.LexicalData.VConsts)[lexical.SecundaryToken].NVal
 		stack.Push(NUM)
 	}
 	return nil

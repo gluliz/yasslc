@@ -92,7 +92,7 @@ func (synt Syntactic) SyntacticAnalysis() error {
 			leftSideToken := ConvertToToken(lenLeft[r][1], &action)
 			nextItem, _ := strconv.Atoi(action[stack.Top().(int)+1][leftSideToken])
 			stack.Push(nextItem)
-			semantic.Semantics(r)
+			semantic.Semantics(types.TRule(r))
 		} else {
 			return errors.New("Syntax error")
 		}
