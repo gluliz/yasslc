@@ -19,7 +19,7 @@ var NNumConsts = 0
 var Tokens []types.TToken
 
 func main() {
-	f, err := os.Open("/home/limar/yasslc/input.ss")
+	f, err := os.Open("input.ss")
 	if err != nil {
 		log.Println(err)
 	}

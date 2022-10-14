@@ -63,6 +63,10 @@ func ConvertTokenToPosition(token types.TToken) int {
 	return -1
 }
 
+func (synt Syntactic) Semantics(ruleNumber int) {
+
+}
+
 func (synt Syntactic) SyntacticAnalysis() error {
 	action := ReadCsvFile("./syntactic/action_table.csv")
 	lenLeft := ReadCsvFile("./syntactic/len_left_table.csv")
@@ -87,6 +91,7 @@ func (synt Syntactic) SyntacticAnalysis() error {
 			leftSideToken := ConvertToToken(lenLeft[r][1], &action)
 			nextItem, _ := strconv.Atoi(action[stack.Top()+1][leftSideToken])
 			stack.Push(nextItem)
+			Semantics(r)
 		} else {
 			return errors.New("Syntax error")
 		}

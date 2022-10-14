@@ -59,6 +59,74 @@ const (
 	EOF
 )
 
+type TNonT int
+
+const (
+	B_ TNonT = iota
+	LDV_
+	LS_
+	CHR_
+	DC_
+	LI_
+	T_
+	DE_
+	DF_
+	DT_
+	IDD_
+	LP_
+	NUM_
+	DV_
+	E_
+	L_
+	F_
+	LV_
+	IDU_
+	TRUE_
+	FALSE_
+	STR_
+	R_
+	LDE_
+	LE_
+	S_
+	P_
+	Y_
+)
+
+type TRule int
+
+const (
+	START TRule = iota
+	B_0
+	CHR_0
+	DC_0
+	DC_1
+	DE_0
+	DE_1
+	DF_0
+	DT_0
+	DT_1
+	DT_2
+	DV_0
+	E_0
+	E_1
+	E_2
+	F_0
+	F_1
+	F_2
+	F_3
+	F_4
+	F_5
+	F_6
+	F_7
+	F_8
+	F_9
+	F_10
+	F_11
+	F_12
+	F_13
+	FALSE_0
+)
+
 type TConst struct {
 	ConstType byte // 0-char, 1-int, 2-string
 	CVal      byte
