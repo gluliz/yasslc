@@ -1,0 +1,78 @@
+B { LDV LS }
+CHR c
+DC DC ; LI : T
+DC LI : T
+DE DF
+DE DT
+DF function IDD NB ( LP ) : T MF B
+DT type IDD = array [ NUM ] of T
+DT type IDD = NB struct { DC }
+DT type IDD = T
+DV var LI : T ;
+E E && L
+E E || L
+E L
+F LV
+F ++ LV
+F -- LV
+F LV ++
+F LV --
+F ( E )
+F IDU ( LE )
+F - F
+F ! F
+F TRUE
+F FALSE
+F CHR
+F STR
+F NUM
+FALSE false
+IDD id
+IDU id
+L L < R
+L L > R
+L L <= R
+L L >= R
+L L == R
+L L != R
+L R
+LDE LDE DE
+LDE DE
+LDV LDV DV
+LDV DV
+LE LE , E
+LE E
+LI LI , IDD
+LI IDD
+LP LP , IDD : T
+LP IDD : T
+LS LS S
+LS S
+LV LV . IDU
+LV LV [ E ]
+LV IDU
+NUM n
+P LDE
+R R + Y
+R R - Y
+R Y
+S if ( E ) S
+S if ( E ) S else S
+S while ( E ) S
+S do S while ( E ) ;
+S B
+S LV = E ;
+S break ;
+S continue ;
+STR s
+T integer
+T char
+T boolean
+T string
+T IDU
+TRUE true
+Y Y * F
+Y Y / F
+Y F
+NB 
+MF
