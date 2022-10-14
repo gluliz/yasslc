@@ -232,7 +232,7 @@ type TAttrib struct {
 	MC struct {
 		Type  *TObject
 		Param *TObject
-		Err   int
+		Err   bool
 	}
 	MT, ME, MW, MA struct {
 		Label int
@@ -240,7 +240,7 @@ type TAttrib struct {
 	LE struct {
 		Type  *TObject
 		Param *TObject
-		Rrr   int
+		Err   bool
 		N     int
 	}
 	LI, DC, LP struct {

@@ -32,22 +32,22 @@ func Semantics(rule types.TRule) error {
 		return nil
 	case types.T_0:
 		T.T.Type = scope.PInt
-		T.TNonTerminal = types.T_
+		T.TypeNonTerminal = types.T_
 		T.NSize = 1
 		stack.Push(T)
 	case types.T_1:
 		T.T.Type = scope.PChar
-		T.TNonTerminal = types.T_
+		T.TypeNonTerminal = types.T_
 		T.NSize = 1
 		stack.Push(T)
 	case types.T_2:
 		T.T.Type = scope.PBool
-		T.TNonTerminal = types.T_
+		T.TypeNonTerminal = types.T_
 		T.NSize = 1
 		stack.Push(T)
 	case types.T_3:
 		T.T.Type = scope.PString
-		T.TNonTerminal = types.T_
+		T.TypeNonTerminal = types.T_
 		T.NSize = 1
 		stack.Push(T)
 	case types.T_4:
@@ -68,7 +68,7 @@ func Semantics(rule types.TRule) error {
 			T.NSize = 0
 			//Error
 		}
-		T.TNonTerminal = types.T_
+		T.TypeNonTerminal = types.T_
 		stack.Push(T)
 	case types.DT_0:
 		T = stack.Top().(types.TAttrib)
@@ -190,17 +190,327 @@ func Semantics(rule types.TRule) error {
 
 		p := IDD.ID.Obj
 		t := T.T.Type
-		n := LP1.NSize
 
 		p.Kind = types.PARAM_
 		p.Param.PType = t
-		p.Param.NIndex = n
+		p.Param.NIndex = 0
 		p.Param.NSize = T.NSize
 
-		LP0.LP.List = LP1.LP.List
-		LP0.NSize = n + T.NSize
-		LP0.TypeNonTerminal = types.LP_
-		stack.Push(LP0)
+		LP.LP.List = p
+		LP.NSize = T.NSize
+		LP.TypeNonTerminal = types.LP_
+		stack.Push(LP)
+	case types.B_0:
+	case types.LDV_0:
+	case types.LS_0:
+	case types.LS_1:
+		return nil
+	case types.DV_0:
+		//TODO
+		T = stack.Top().(types.TAttrib)
+		t := T.T.Type
+		stack.Pop()
+		LI = stack.Top().(types.TAttrib)
+		stack.Pop()
+		p := LI.LI.List
+
+	case types.LI_0:
+		IDD = stack.Top().(types.TAttrib)
+		stack.Pop()
+		LI1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+		LI0.LI.List = LI1.LI.List
+		LI0.TypeNonTerminal = types.LI_
+		stack.Push(LI0)
+	case types.LI_1:
+		IDD = stack.Top().(types.TAttrib)
+		LI.LI.List = IDD.ID.Obj
+		LI.TypeNonTerminal = types.LI_
+		stack.Pop()
+		stack.Push(LI)
+	case types.S_0:
+		MT = stack.Top().(types.TAttrib)
+		stack.Pop()
+		E = stack.Top().(types.TAttrib)
+		stack.Pop()
+	case types.S_4:
+		scope.EndBlock()
+	case types.S_5:
+		E = stack.Top().(types.TAttrib)
+		stack.Pop()
+		LV = stack.Top().(types.TAttrib)
+		stack.Pop()
+		t := LV.LV.Type
+	case types.S_6:
+	case types.S_7:
+		return nil
+	case types.E_0:
+		L = stack.Top().(types.TAttrib)
+		stack.Pop()
+		E1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+		E0.E.Type = scope.PBool
+		E0.TypeNonTerminal = types.E_
+		stack.Push(E0)
+	case types.E_1:
+		L = stack.Top().(types.TAttrib)
+		stack.Pop()
+		E1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+		E0.E.Type = scope.PBool
+		E0.TypeNonTerminal = types.E_
+		stack.Push(E0)
+	case types.E_2:
+		L = stack.Top().(types.TAttrib)
+		stack.Pop()
+		E.E.Type = L.L.Type
+		E.TypeNonTerminal = types.E_
+		stack.Push(E)
+	case types.L_0:
+		R = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L0.L.Type = scope.PBool
+		L0.TypeNonTerminal = types.L_
+		stack.Push(L0)
+	case types.L_1:
+		R = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L0.L.Type = scope.PBool
+		L0.TypeNonTerminal = types.L_
+		stack.Push(L0)
+	case types.L_2:
+		R = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L0.L.Type = scope.PBool
+		L0.TypeNonTerminal = types.L_
+		stack.Push(L0)
+	case types.L_3:
+		R = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L0.L.Type = scope.PBool
+		L0.TypeNonTerminal = types.L_
+		stack.Push(L0)
+	case types.L_4:
+		R = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L0.L.Type = scope.PBool
+		L0.TypeNonTerminal = types.L_
+		stack.Push(L0)
+	case types.L_5:
+		R = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L0.L.Type = scope.PBool
+		L0.TypeNonTerminal = types.L_
+		stack.Push(L0)
+	case types.L_6:
+		R = stack.Top().(types.TAttrib)
+		stack.Pop()
+		L.L.Type = R.R.Type
+		L.TypeNonTerminal = types.L_
+		stack.Push(L)
+	case types.R_0:
+		Y = stack.Top().(types.TAttrib)
+		stack.Pop()
+		R1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+
+		R0.R.Type = R1.R.Type
+		R0.TypeNonTerminal = types.R_
+		stack.Push(R0)
+	case types.R_1:
+		Y = stack.Top().(types.TAttrib)
+		stack.Pop()
+		R1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+
+		R0.R.Type = R1.R.Type
+		R0.TypeNonTerminal = types.R_
+		stack.Push(R0)
+	case types.R_2:
+		Y = stack.Top().(types.TAttrib)
+		stack.Pop()
+
+		R.R.Type = Y.Y.Type
+		R.TypeNonTerminal = types.R_
+		stack.Push(R)
+	case types.Y_0:
+		F = stack.Top().(types.TAttrib)
+		stack.Pop()
+		Y1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+
+		Y0.Y.Type = Y1.Y.Type
+		Y0.TypeNonTerminal = types.Y_
+		stack.Push(Y0)
+	case types.Y_1:
+		F = stack.Top().(types.TAttrib)
+		stack.Pop()
+		Y1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+
+		Y0.Y.Type = Y1.Y.Type
+		Y0.TypeNonTerminal = types.Y_
+		stack.Push(Y0)
+	case types.Y_2:
+		F = stack.Top().(types.TAttrib)
+		stack.Pop()
+		Y.Y.Type = F.F.Type
+		Y.TypeNonTerminal = types.Y_
+		stack.Push(Y)
+	case types.F_0:
+		LV = stack.Top().(types.TAttrib)
+		stack.Pop()
+
+		n := LV.LV.Type.Type.NSize
+		F.F.Type = LV.LV.Type
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.F_1:
+		LV = stack.Top().(types.TAttrib)
+		stack.Pop()
+		t := LV.LV.Type
+		F.F.Type = scope.PInt
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.F_2:
+		LV = stack.Top().(types.TAttrib)
+		stack.Pop()
+		t := LV.LV.Type
+		F.F.Type = LV.LV.Type
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.F_3:
+		LV = stack.Top().(types.TAttrib)
+		stack.Pop()
+		t := LV.LV.Type
+		F.F.Type = LV.LV.Type
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.F_4:
+		LV = stack.Top().(types.TAttrib)
+		stack.Pop()
+		t := LV.LV.Type
+		F.F.Type = t
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.F_5:
+		E = stack.Top().(types.TAttrib)
+		stack.Top()
+
+		F.F.Type = E.E.Type
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.F_6:
+		LE = stack.Top().(types.TAttrib)
+		stack.Top()
+		MC = stack.Top().(types.TAttrib)
+		stack.Top()
+		IDU = stack.Top().(types.TAttrib)
+		stack.Top()
+
+		f := IDU.ID.Obj
+		F.F.Type = MC.MC.Type
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.F_7:
+		F1 = stack.Top().(types.TAttrib)
+		stack.Top()
+
+		F0.F.Type = F1.F.Type
+		F0.TypeNonTerminal = types.F_
+		stack.Push(F0)
+	case types.F_8:
+		F1 = stack.Top().(types.TAttrib)
+		stack.Top()
+
+		F0.F.Type = F1.F.Type
+		F0.TypeNonTerminal = types.F_
+		stack.Push(F0)
+	case types.F_9:
+		TRUE = stack.Top().(types.TAttrib)
+		stack.Top()
+
+		F.F.Type = scope.PBool
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.F_10:
+		FALSE = stack.Top().(types.TAttrib)
+		stack.Top()
+
+		F.F.Type = scope.PBool
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.F_11:
+		CHR = stack.Top().(types.TAttrib)
+		stack.Top()
+
+		F.F.Type = scope.PChar
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.F_12:
+		STR = stack.Top().(types.TAttrib)
+		stack.Top()
+
+		F.F.Type = scope.PString
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.F_13:
+		NUM = stack.Top().(types.TAttrib)
+		stack.Top()
+
+		F.F.Type = scope.PInt
+		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+	case types.LE_1:
+		E = stack.Top().(types.TAttrib)
+		stack.Pop()
+		MC = stack.Top().(types.TAttrib)
+
+		LE.LE.Param = nil
+		LE.LE.Err = MC.MC.Err
+		n := 1
+		if !MC.MC.Err {
+			p := MC.MC.Param
+			if p == nil {
+				LE.LE.Err = true
+			} else {
+				LE.LE.Param = p.PNext
+				LE.LE.N = n + 1
+			}
+		}
+		LE.TypeNonTerminal = types.LE_
+		stack.Push(LE)
+	case types.LE_0:
+		E = stack.Top().(types.TAttrib)
+		stack.Pop()
+		LE1 = stack.Top().(types.TAttrib)
+		stack.Pop()
+		LE0.LE.Param = nil
+		LE0.LE.Err = L1.LE.Err
+		n := LE1.LE.N
+		if !LE1.LE.Err {
+			p := LE1.LE.Param
+			if p == nil {
+				LE0.LE.Err = true
+			} else {
+				LE0.LE.Param = p.PNext
+				LE0.LE.N = n + 1
+			}
+		}
+		LE0.TypeNonTerminal = types.LE_
+		stack.Push(LE0)
 	case types.LV_0:
 		ID = stack.Top().(types.TAttrib)
 		stack.Pop()
