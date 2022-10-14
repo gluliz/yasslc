@@ -20,9 +20,9 @@ var Univesal_ = types.TObject{NName: -1, PNext: nil, Kind: types.SCALAR_TYPE_}
 var PUniversal = &Univesal_
 
 var (
-	symbolTable     [MaxNestLevel]*types.TObject
-	symbolTableLast [MaxNestLevel]*types.TObject
-	nCurrentLevel   = -1
+	symbolTable     = new([MaxNestLevel]*types.TObject)
+	symbolTableLast = new([MaxNestLevel]*types.TObject)
+	nCurrentLevel   = 0
 )
 
 func NewBlock() int {
