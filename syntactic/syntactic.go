@@ -69,6 +69,7 @@ func (synt Syntactic) Semantics(ruleNumber int) {
 }
 
 func (synt Syntactic) SyntacticAnalysis() error {
+	semantic.Data.LexicalData = &synt.Lexical
 	action := ReadCsvFile("./syntactic/action_table.csv")
 	lenLeft := ReadCsvFile("./syntactic/len_left_table.csv")
 	final := 5 // for this specific grammar; TODO: read this from action table
@@ -92,7 +93,10 @@ func (synt Syntactic) SyntacticAnalysis() error {
 			leftSideToken := ConvertToToken(lenLeft[r][1], &action)
 			nextItem, _ := strconv.Atoi(action[stack.Top().(int)+1][leftSideToken])
 			stack.Push(nextItem)
-			semantic.Semantics(types.TRule(r))
+			err := semantic.Semantics(types.TRule(r))
+			if err != nil {
+				return err
+			}
 		} else {
 			return errors.New("Syntax error")
 		}

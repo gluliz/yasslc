@@ -92,6 +92,7 @@ const (
 	Y_
 	ID_
 	NF_
+	MC_
 )
 
 type TRule int
@@ -249,7 +250,7 @@ type TAttrib struct {
 
 	TRUE, FALSE struct {
 		Type *TObject
-		Val  int
+		Val  bool
 	}
 	CHR struct {
 		Type *TObject

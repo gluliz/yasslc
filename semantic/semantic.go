@@ -19,6 +19,43 @@ var (
 	NFunc           = 0
 )
 
+func CheckTypes(t1 *types.TObject, t2 *types.TObject) bool {
+	if t1 == t2 {
+		return true
+	}
+	if t1 == scope.PUniversal || t2 == scope.PUniversal {
+		return true
+	}
+	if t1.Kind == types.UNIVERSAL_ || t2.Kind == types.UNIVERSAL_ {
+		return true
+	}
+	if t1.Kind == types.ALIAS_TYPE_ && t2.Kind != types.ALIAS_TYPE_ {
+		return CheckTypes(t1.Alias.PBaseType, t2)
+	}
+	if t2.Kind == types.ALIAS_TYPE_ && t1.Kind != types.ALIAS_TYPE_ {
+		return CheckTypes(t2.Alias.PBaseType, t1)
+	}
+	if t1.Kind == t2.Kind {
+		if t1.Kind == types.ALIAS_TYPE_ {
+			return CheckTypes(t1.Alias.PBaseType, t2.Alias.PBaseType)
+		} else if t1.Kind == types.ARRAY_TYPE_ {
+			if t1.Array.NNumElems == t2.Array.NNumElems {
+				return CheckTypes(t1.Array.PElemType, t2.Array.PElemType)
+			}
+		} else if t1.Kind == types.STRUCT_TYPE_ {
+			f1 := t1.Struct.PFields
+			f2 := t2.Struct.PFields
+			for f1 != nil && f2 != nil {
+				if !CheckTypes(f1.Field.PType, f2.Field.PType) {
+					return false
+				}
+			}
+			return (f1 == nil && f2 == nil)
+		}
+	}
+	return false
+}
+
 func Semantics(rule types.TRule) error {
 	var (
 		IDD, IDU, ID, T, LI, LI0, LI1, TRUE, FALSE, CHR, E1, STR, NUM, DC, DC0, DC1, LP, LP0, LP1, E, E0, L, L0, L1, R, R0, R1, Y, Y0, Y1, F, F0, F1, LV, LV0, LV1, MC, LE, LE0, LE1, MF types.TAttrib
@@ -208,14 +245,23 @@ func Semantics(rule types.TRule) error {
 	case types.LS_1:
 		return nil
 	case types.DV_0:
-		// TODO
 		T = stack.Top().(types.TAttrib)
-		//t := T.T.Type
+		t := T.T.Type
 		stack.Pop()
 		LI = stack.Top().(types.TAttrib)
 		stack.Pop()
-		//p := LI.LI.List
+		p := LI.LI.List
+		n := CurrentFunction.Function.NVars
+		for p != nil && p.Kind == types.NO_KIND_DEF {
+			p.Kind = types.VAR_
+			p.Var.PType = t
+			p.Var.NSize = T.NSize
+			p.Var.NIndex = n
 
+			n += T.NSize
+			p = p.PNext
+		}
+		CurrentFunction.Function.NVars = n
 	case types.LI_0:
 		IDD = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -236,6 +282,47 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		E = stack.Top().(types.TAttrib)
 		stack.Pop()
+		t := E.E.Type
+		if !CheckTypes(t, scope.PBool) {
+			return errors.New("Bool type expected")
+		}
+	case types.S_1:
+		//ME = stack.Top().(types.TAttrib)
+		//stack.Pop()
+		//MT = stack.Top().(types.TAttrib)
+		//stack.Pop()
+		E = stack.Top().(types.TAttrib)
+		stack.Pop()
+
+		//l := ME.ME.Label
+		t := E.E.Type
+		if !CheckTypes(t, scope.PBool) {
+			return errors.New("Bool expected")
+		}
+	case types.S_2:
+		//MT = stack.Top().(types.TAttrib)
+		//stack.Pop()
+		E = stack.Top().(types.TAttrib)
+		stack.Pop()
+		//MW = stack.Top().(types.TAttrib)
+		//stack.Pop()
+
+		//l := ME.ME.Label
+		t := E.E.Type
+		if !CheckTypes(t, scope.PBool) {
+			return errors.New("Bool expected")
+		}
+	case types.S_3:
+		E = stack.Top().(types.TAttrib)
+		stack.Pop()
+		//MW = stack.Top().(types.TAttrib)
+		//stack.Pop()
+
+		//l := ME.ME.Label
+		t := E.E.Type
+		if !CheckTypes(t, scope.PBool) {
+			return errors.New("Bool expected")
+		}
 	case types.S_4:
 		scope.EndBlock()
 	case types.S_5:
@@ -243,7 +330,12 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
-		//t := LV.LV.Type
+		t1 := LV.LV.Type
+		t2 := E.E.Type
+
+		if !CheckTypes(t1, t2) {
+			return errors.New("Types mismatch")
+		}
 	case types.S_6:
 	case types.S_7:
 		return nil
@@ -252,6 +344,9 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		E1 = stack.Top().(types.TAttrib)
 		stack.Pop()
+		if !CheckTypes(L.L.Type, scope.PBool) || !CheckTypes(E1.E.Type, scope.PBool) {
+			return errors.New("Bool type expected")
+		}
 		E0.E.Type = scope.PBool
 		E0.TypeNonTerminal = types.E_
 		stack.Push(E0)
@@ -260,6 +355,9 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		E1 = stack.Top().(types.TAttrib)
 		stack.Pop()
+		if !CheckTypes(L.L.Type, scope.PBool) || !CheckTypes(E1.E.Type, scope.PBool) {
+			return errors.New("Bool type expected")
+		}
 		E0.E.Type = scope.PBool
 		E0.TypeNonTerminal = types.E_
 		stack.Push(E1)
@@ -274,6 +372,9 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		L1 = stack.Top().(types.TAttrib)
 		stack.Pop()
+		if !CheckTypes(R.R.Type, L1.L.Type) {
+			return errors.New("Types mismatch")
+		}
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
@@ -282,6 +383,9 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		L1 = stack.Top().(types.TAttrib)
 		stack.Pop()
+		if !CheckTypes(R.R.Type, L1.L.Type) {
+			return errors.New("Types mismatch")
+		}
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
@@ -290,6 +394,9 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		L1 = stack.Top().(types.TAttrib)
 		stack.Pop()
+		if !CheckTypes(R.R.Type, L1.L.Type) {
+			return errors.New("Types mismatch")
+		}
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
@@ -298,6 +405,9 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		L1 = stack.Top().(types.TAttrib)
 		stack.Pop()
+		if !CheckTypes(R.R.Type, L1.L.Type) {
+			return errors.New("Types mismatch")
+		}
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
@@ -306,6 +416,9 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		L1 = stack.Top().(types.TAttrib)
 		stack.Pop()
+		if !CheckTypes(R.R.Type, L1.L.Type) {
+			return errors.New("Types mismatch")
+		}
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
@@ -314,6 +427,9 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		L1 = stack.Top().(types.TAttrib)
 		stack.Pop()
+		if !CheckTypes(R.R.Type, L1.L.Type) {
+			return errors.New("Types mismatch")
+		}
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
@@ -328,7 +444,12 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		R1 = stack.Top().(types.TAttrib)
 		stack.Pop()
-
+		if !CheckTypes(R1.R.Type, Y.Y.Type) {
+			return errors.New("Types mismatch")
+		}
+		if !CheckTypes(R1.R.Type, scope.PInt) && !CheckTypes(R1.R.Type, scope.PString) {
+			return errors.New("Invalid type")
+		}
 		R0.R.Type = R1.R.Type
 		R0.TypeNonTerminal = types.R_
 		stack.Push(R0)
@@ -337,7 +458,12 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		R1 = stack.Top().(types.TAttrib)
 		stack.Pop()
-
+		if !CheckTypes(R1.R.Type, Y.Y.Type) {
+			return errors.New("Types mismatch")
+		}
+		if !CheckTypes(R1.R.Type, scope.PInt) {
+			return errors.New("Invalid type")
+		}
 		R0.R.Type = R1.R.Type
 		R0.TypeNonTerminal = types.R_
 		stack.Push(R0)
@@ -353,7 +479,12 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		Y1 = stack.Top().(types.TAttrib)
 		stack.Pop()
-
+		if !CheckTypes(F.F.Type, Y1.Y.Type) {
+			return errors.New("Types mismatch")
+		}
+		if !CheckTypes(F.F.Type, scope.PInt) {
+			return errors.New("Invalid type")
+		}
 		Y0.Y.Type = Y1.Y.Type
 		Y0.TypeNonTerminal = types.Y_
 		stack.Push(Y0)
@@ -362,7 +493,12 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 		Y1 = stack.Top().(types.TAttrib)
 		stack.Pop()
-
+		if !CheckTypes(F.F.Type, Y1.Y.Type) {
+			return errors.New("Types mismatch")
+		}
+		if !CheckTypes(F.F.Type, scope.PInt) {
+			return errors.New("Invalid type")
+		}
 		Y0.Y.Type = Y1.Y.Type
 		Y0.TypeNonTerminal = types.Y_
 		stack.Push(Y0)
@@ -383,95 +519,111 @@ func Semantics(rule types.TRule) error {
 	case types.F_1:
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
-		//t := LV.LV.Type
+		if !CheckTypes(LV.LV.Type, scope.PInt) {
+			return errors.New("Invalid type")
+		}
 		F.F.Type = scope.PInt
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_2:
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
-		//t := LV.LV.Type
+		if !CheckTypes(LV.LV.Type, scope.PInt) {
+			return errors.New("Invalid type")
+		}
 		F.F.Type = LV.LV.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_3:
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
-		//t := LV.LV.Type
+		if !CheckTypes(LV.LV.Type, scope.PInt) {
+			return errors.New("Invalid type")
+		}
 		F.F.Type = LV.LV.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_4:
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
-		t := LV.LV.Type
-		F.F.Type = t
+		if !CheckTypes(LV.LV.Type, scope.PInt) {
+			return errors.New("Invalid type")
+		}
+		F.F.Type = LV.LV.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_5:
 		E = stack.Top().(types.TAttrib)
-		stack.Top()
+		stack.Pop()
 
 		F.F.Type = E.E.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_6:
 		LE = stack.Top().(types.TAttrib)
-		stack.Top()
+		stack.Pop()
 		MC = stack.Top().(types.TAttrib)
-		stack.Top()
+		stack.Pop()
 		IDU = stack.Top().(types.TAttrib)
-		stack.Top()
-
+		stack.Pop()
+		if !MC.MC.Err {
+			if LE.LE.Param != nil {
+				return errors.New("Too few args")
+			}
+		}
 		//f := IDU.ID.Obj
 		F.F.Type = MC.MC.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_7:
 		F1 = stack.Top().(types.TAttrib)
-		stack.Top()
-
+		stack.Pop()
+		if !CheckTypes(F1.F.Type, scope.PInt) {
+			return errors.New("Invalid type")
+		}
 		F0.F.Type = F1.F.Type
 		F0.TypeNonTerminal = types.F_
 		stack.Push(F0)
 	case types.F_8:
 		F1 = stack.Top().(types.TAttrib)
-		stack.Top()
-
+		stack.Pop()
+		if !CheckTypes(F1.F.Type, scope.PBool) {
+			return errors.New("Invalid type")
+		}
 		F0.F.Type = F1.F.Type
 		F0.TypeNonTerminal = types.F_
 		stack.Push(F0)
 	case types.F_9:
 		TRUE = stack.Top().(types.TAttrib)
-		stack.Top()
+		stack.Pop()
 
 		F.F.Type = scope.PBool
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_10:
 		FALSE = stack.Top().(types.TAttrib)
-		stack.Top()
+		stack.Pop()
 
 		F.F.Type = scope.PBool
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_11:
 		CHR = stack.Top().(types.TAttrib)
-		stack.Top()
+		stack.Pop()
 
 		F.F.Type = scope.PChar
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_12:
 		STR = stack.Top().(types.TAttrib)
-		stack.Top()
+		stack.Pop()
 
 		F.F.Type = scope.PString
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 	case types.F_13:
 		NUM = stack.Top().(types.TAttrib)
-		stack.Top()
+		stack.Pop()
 
 		F.F.Type = scope.PInt
 		F.TypeNonTerminal = types.F_
@@ -488,7 +640,11 @@ func Semantics(rule types.TRule) error {
 			p := MC.MC.Param
 			if p == nil {
 				LE.LE.Err = true
+				return errors.New("Too many args")
 			} else {
+				if !CheckTypes(p.Param.PType, E.E.Type) {
+					return errors.New("Wrong param type")
+				}
 				LE.LE.Param = p.PNext
 				LE.LE.N = n + 1
 			}
@@ -507,7 +663,11 @@ func Semantics(rule types.TRule) error {
 			p := LE1.LE.Param
 			if p == nil {
 				LE0.LE.Err = true
+				return errors.New("Too many args")
 			} else {
+				if !CheckTypes(p.Param.PType, E.E.Type) {
+					return errors.New("Wrong param type")
+				}
 				LE0.LE.Param = p.PNext
 				LE0.LE.N = n + 1
 			}
@@ -523,7 +683,7 @@ func Semantics(rule types.TRule) error {
 		t := LV1.LV.Type
 		if t.Kind != types.STRUCT_TYPE_ {
 			if t.Kind != types.UNIVERSAL_ {
-				// TODO Error( ERR_KIND_NOT_STRUCT);
+				return errors.New("Kind not struct")
 			}
 			LV0.LV.Type = scope.PUniversal
 		} else {
@@ -552,21 +712,21 @@ func Semantics(rule types.TRule) error {
 		stack.Pop()
 
 		t := LV1.LV.Type
-		// if (CheckTypes(t, scope.PString)) {
-
-		// }
+		if CheckTypes(t, scope.PString) {
+			LV0.LV.Type = scope.PChar
+		}
 		if t.Kind != types.ARRAY_TYPE_ {
 			if t.Kind != types.UNIVERSAL_ {
-				// TODO
+				return errors.New("Kind not array")
 			}
 			LV0.LV.Type = scope.PUniversal
 		} else {
 			LV0.LV.Type = t.Array.PElemType
 			//n := t.Array.PElemType.Type.NSize
 		}
-		// if( !check_types(E_static.E.type,pInt)){
-		// 	Error(ERR_INVALID_INDEX_TYPE);
-		// }
+		if !CheckTypes(E.E.Type, scope.PInt) {
+			return errors.New("Invalid index type")
+		}
 		LV0.TypeNonTerminal = types.LV_
 		stack.Push(LV0)
 
@@ -577,7 +737,7 @@ func Semantics(rule types.TRule) error {
 		p := IDU.ID.Obj
 		if p.Kind != types.VAR_ && p.Kind != types.PARAM_ {
 			if p.Kind != types.UNIVERSAL_ {
-				//Error(ERR_KIND_NOT_VAR);
+				return errors.New("Kind not var")
 			}
 			LV.LV.Type = scope.PUniversal
 		} else {
@@ -620,8 +780,18 @@ func Semantics(rule types.TRule) error {
 		stack.Push(MF)
 
 	case types.MC_0:
-		//IDU := stack.Top().(types.TAttrib)
-		//f = IDU.ID.Obj
+		IDU = stack.Top().(types.TAttrib)
+		f := IDU.ID.Obj
+		if f.Kind != types.FUNCTION_ {
+			MC.MC.Type = scope.PUniversal
+			MC.MC.Param = nil
+			MC.MC.Err = true
+		} else {
+			MC.MC.Type = f.Function.PRetType
+			MC.MC.Param = f.Function.PParams
+			MC.MC.Err = false
+		}
+		MC.TypeNonTerminal = types.MC_
 		stack.Push(MC)
 
 	case types.IDD_0:
@@ -633,6 +803,7 @@ func Semantics(rule types.TRule) error {
 		} else {
 			p = scope.Define(name)
 		}
+		p.Kind = types.NO_KIND_DEF
 		IDD.ID.Obj = p
 		stack.Push(IDD)
 
@@ -653,13 +824,15 @@ func Semantics(rule types.TRule) error {
 		stack.Push(ID)
 
 	case types.TRUE_0:
-		// TODO: change this to boolean true
-		TRUE.TRUE.Val = 0
+		TRUE.TypeNonTerminal = types.TRUE_
+		TRUE.TRUE.Val = true
+		TRUE.TRUE.Type = scope.PBool
 		stack.Push(TRUE)
 
 	case types.FALSE_0:
-		// TODO: change this to boolean false
-		FALSE.FALSE.Val = 0
+		FALSE.TypeNonTerminal = types.FALSE_
+		FALSE.FALSE.Type = scope.PBool
+		FALSE.FALSE.Val = true
 		stack.Push(FALSE)
 
 	case types.CHR_0:
