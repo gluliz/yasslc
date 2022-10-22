@@ -1,6 +1,7 @@
 package lexical
 
 import (
+	"bufio"
 	"os"
 	"strconv"
 	"unicode"
@@ -9,6 +10,8 @@ import (
 
 type Data struct {
 	F               *os.File
+	W               *bufio.Writer
+	FOut            *os.File
 	ReservedWords   []string
 	Tokens          *[]types.TToken
 	SecundaryTokens map[string]int

@@ -54,7 +54,10 @@
 4,LV
 1,LV
 0,MC
+0,ME
 0,MF
+0,MT
+0,MW
 0,NB
 0,NF
 1,NUM
@@ -70,6 +73,7 @@
 4,S
 2,S
 2,S
+4,S
 1,STR
 1,T
 1,T

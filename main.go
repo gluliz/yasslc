@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -24,7 +25,13 @@ func main() {
 		log.Println(err)
 	}
 	defer f.Close()
-	data := lexical.Data{F: f, ReservedWords: ReservedWords, SecundaryTokens: SecundaryTokens, NNumSecTokens: &NNumSecTokens, NNumConsts: &NNumConsts, VConsts: &VConsts, Tokens: &Tokens}
+	fOut, err := os.Create("output")
+	if err != nil {
+		log.Println(err)
+	}
+	defer fOut.Close()
+	w := bufio.NewWriter(fOut)
+	data := lexical.Data{F: f, W: w, FOut: fOut, ReservedWords: ReservedWords, SecundaryTokens: SecundaryTokens, NNumSecTokens: &NNumSecTokens, NNumConsts: &NNumConsts, VConsts: &VConsts, Tokens: &Tokens}
 	syntactic := syntactic.Syntactic{Lexical: data}
 	err = syntactic.SyntacticAnalysis()
 	if err != nil {

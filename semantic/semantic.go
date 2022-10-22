@@ -2,6 +2,8 @@ package semantic
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"yasslc/lexical"
 	"yasslc/scope"
 	"yasslc/types"
@@ -17,7 +19,14 @@ var (
 	Data            Semantic
 	CurrentFunction *types.TObject
 	NFunc           = 0
+	FunctionVarPos  = 0
+	LabelNumber     = 0
 )
+
+func NewLabel() int {
+	LabelNumber++
+	return LabelNumber
+}
 
 func CheckTypes(t1 *types.TObject, t2 *types.TObject) bool {
 	if t1 == t2 {
@@ -58,7 +67,7 @@ func CheckTypes(t1 *types.TObject, t2 *types.TObject) bool {
 
 func Semantics(rule types.TRule) error {
 	var (
-		IDD, IDU, ID, T, LI, LI0, LI1, TRUE, FALSE, CHR, E1, STR, NUM, DC, DC0, DC1, LP, LP0, LP1, E, E0, L, L0, L1, R, R0, R1, Y, Y0, Y1, F, F0, F1, LV, LV0, LV1, MC, LE, LE0, LE1, MF types.TAttrib
+		IDD, IDU, ID, T, LI, LI0, LI1, TRUE, FALSE, CHR, E1, STR, NUM, DC, DC0, DC1, LP, LP0, LP1, E, E0, L, L0, L1, R, R0, R1, Y, Y0, Y1, F, F0, F1, LV, LV0, LV1, MC, LE, LE0, LE1, MT, ME, MW types.TAttrib
 	)
 	//
 	//MT, ME, MW, NB
@@ -240,6 +249,12 @@ func Semantics(rule types.TRule) error {
 		LP.TypeNonTerminal = types.LP_
 		stack.Push(LP)
 	case types.B_0:
+		fmt.Fprint(os.Stdout, "END_FUNC\n")
+		//offset, _ := Data.LexicalData.FOut.Seek(0, io.SeekCurrent)
+		//Data.LexicalData.FOut.Seek(int64(FunctionVarPos), io.SeekStart)
+		//fmt.Fprint(os.Stdout, "%02d\n", CurrentFunction.Function.NVars)
+		//Data.LexicalData.FOut.Seek(offset, io.SeekStart)
+
 	case types.LDV_0:
 	case types.LS_0:
 	case types.LS_1:
@@ -276,9 +291,21 @@ func Semantics(rule types.TRule) error {
 		LI.TypeNonTerminal = types.LI_
 		stack.Pop()
 		stack.Push(LI)
+	case types.MW_0:
+		l := NewLabel()
+		MW.MW.Label = l
+		stack.Push(MW)
+		fmt.Fprintf(os.Stdout, "L%d\n", l)
+	case types.ME_0:
+		MT = stack.Top().(types.TAttrib)
+		l1 := MT.MT.Label
+		l2 := NewLabel()
+		ME.ME.Label = l2
+		ME.TypeNonTerminal = types.ME_
+		stack.Push(ME)
+		fmt.Fprintf(os.Stdout, "\tJMP_FW L%d:\nL%d\n", l2, l1)
 	case types.S_0:
-		// TODO: replace _ by MT for code generation purposes
-		_ = stack.Top().(types.TAttrib)
+		MT = stack.Top().(types.TAttrib)
 		stack.Pop()
 		E = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -286,43 +313,47 @@ func Semantics(rule types.TRule) error {
 		if !CheckTypes(t, scope.PBool) {
 			return errors.New("Bool type expected")
 		}
+		fmt.Fprintf(os.Stdout, "L%d\n", MT.MT.Label)
 	case types.S_1:
-		//ME = stack.Top().(types.TAttrib)
-		//stack.Pop()
-		//MT = stack.Top().(types.TAttrib)
-		//stack.Pop()
+		ME = stack.Top().(types.TAttrib)
+		stack.Pop()
+		MT = stack.Top().(types.TAttrib)
+		stack.Pop()
 		E = stack.Top().(types.TAttrib)
 		stack.Pop()
 
-		//l := ME.ME.Label
+		l := ME.ME.Label
 		t := E.E.Type
 		if !CheckTypes(t, scope.PBool) {
 			return errors.New("Bool expected")
 		}
+		fmt.Fprintf(os.Stdout, "L%d:\n", l)
 	case types.S_2:
-		//MT = stack.Top().(types.TAttrib)
-		//stack.Pop()
+		MT = stack.Top().(types.TAttrib)
+		stack.Pop()
 		E = stack.Top().(types.TAttrib)
 		stack.Pop()
-		//MW = stack.Top().(types.TAttrib)
-		//stack.Pop()
+		MW = stack.Top().(types.TAttrib)
+		stack.Pop()
 
-		//l := ME.ME.Label
-		t := E.E.Type
-		if !CheckTypes(t, scope.PBool) {
+		l1 := MW.MW.Label
+		l2 := MT.MT.Label
+		if !CheckTypes(E.E.Type, scope.PBool) {
 			return errors.New("Bool expected")
 		}
+		fmt.Fprintf(os.Stdout, "\tJMP_BW L%d\nL%d\n", l1, l2)
 	case types.S_3:
 		E = stack.Top().(types.TAttrib)
 		stack.Pop()
-		//MW = stack.Top().(types.TAttrib)
-		//stack.Pop()
+		MW = stack.Top().(types.TAttrib)
+		stack.Pop()
 
-		//l := ME.ME.Label
+		l := MW.MW.Label
 		t := E.E.Type
 		if !CheckTypes(t, scope.PBool) {
 			return errors.New("Bool expected")
 		}
+		fmt.Fprintf(os.Stdout, "\tNOT\n\tTJMP_BW L%d\n", l)
 	case types.S_4:
 		scope.EndBlock()
 	case types.S_5:
@@ -336,9 +367,26 @@ func Semantics(rule types.TRule) error {
 		if !CheckTypes(t1, t2) {
 			return errors.New("Types mismatch")
 		}
+		fmt.Fprintf(os.Stdout, "\tSTORE_REF %d\n", t1.Type.NSize)
 	case types.S_6:
 	case types.S_7:
 		return nil
+	case types.S_8:
+		E = stack.Top().(types.TAttrib)
+		stack.Pop()
+		IDU = stack.Top().(types.TAttrib)
+		stack.Pop()
+		p := IDU.ID.Obj
+		if p.Kind != types.VAR_ && p.Kind != types.PARAM_ {
+			return errors.New("Kind not var")
+		} else {
+			t1 := p.Var.PType
+			t2 := E.E.Type
+			if !CheckTypes(t1, t2) {
+				return errors.New("Type mismatch")
+			}
+		}
+		fmt.Fprintf(os.Stdout, "\t\tSTORE_VAR %d\n", p.Var.NIndex)
 	case types.E_0:
 		L = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -350,6 +398,7 @@ func Semantics(rule types.TRule) error {
 		E0.E.Type = scope.PBool
 		E0.TypeNonTerminal = types.E_
 		stack.Push(E0)
+		fmt.Fprintf(os.Stdout, "\tAND\n")
 	case types.E_1:
 		L = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -361,6 +410,7 @@ func Semantics(rule types.TRule) error {
 		E0.E.Type = scope.PBool
 		E0.TypeNonTerminal = types.E_
 		stack.Push(E1)
+		fmt.Fprintf(os.Stdout, "\tOR\n")
 	case types.E_2:
 		L = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -378,6 +428,7 @@ func Semantics(rule types.TRule) error {
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
+		fmt.Fprintf(os.Stdout, "\tLT\n")
 	case types.L_1:
 		R = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -389,6 +440,7 @@ func Semantics(rule types.TRule) error {
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
+		fmt.Fprintf(os.Stdout, "\tGT\n")
 	case types.L_2:
 		R = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -400,6 +452,7 @@ func Semantics(rule types.TRule) error {
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
+		fmt.Fprintf(os.Stdout, "\tLE\n")
 	case types.L_3:
 		R = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -411,6 +464,7 @@ func Semantics(rule types.TRule) error {
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
+		fmt.Fprintf(os.Stdout, "\tGE\n")
 	case types.L_4:
 		R = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -422,6 +476,7 @@ func Semantics(rule types.TRule) error {
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
+		fmt.Fprintf(os.Stdout, "\tEQ\n")
 	case types.L_5:
 		R = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -433,12 +488,19 @@ func Semantics(rule types.TRule) error {
 		L0.L.Type = scope.PBool
 		L0.TypeNonTerminal = types.L_
 		stack.Push(L0)
+		fmt.Fprintf(os.Stdout, "\tNE\n")
 	case types.L_6:
 		R = stack.Top().(types.TAttrib)
 		stack.Pop()
 		L.L.Type = R.R.Type
 		L.TypeNonTerminal = types.L_
 		stack.Push(L)
+	case types.MT_0:
+		l := NewLabel()
+		MT.MT.Label = 1
+		MT.TypeNonTerminal = types.MT_
+		fmt.Fprintf(os.Stdout, "\tTJMP_FW L%d\n", l)
+		stack.Push(MT)
 	case types.R_0:
 		Y = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -453,6 +515,7 @@ func Semantics(rule types.TRule) error {
 		R0.R.Type = R1.R.Type
 		R0.TypeNonTerminal = types.R_
 		stack.Push(R0)
+		fmt.Fprintf(os.Stdout, "\tADD\n")
 	case types.R_1:
 		Y = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -467,6 +530,7 @@ func Semantics(rule types.TRule) error {
 		R0.R.Type = R1.R.Type
 		R0.TypeNonTerminal = types.R_
 		stack.Push(R0)
+		fmt.Fprintf(os.Stdout, "\tSUB\n")
 	case types.R_2:
 		Y = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -488,6 +552,7 @@ func Semantics(rule types.TRule) error {
 		Y0.Y.Type = Y1.Y.Type
 		Y0.TypeNonTerminal = types.Y_
 		stack.Push(Y0)
+		fmt.Fprintf(os.Stdout, "\tMUL\n")
 	case types.Y_1:
 		F = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -502,6 +567,7 @@ func Semantics(rule types.TRule) error {
 		Y0.Y.Type = Y1.Y.Type
 		Y0.TypeNonTerminal = types.Y_
 		stack.Push(Y0)
+		fmt.Fprintf(os.Stdout, "\tDIV\n")
 	case types.Y_2:
 		F = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -512,10 +578,11 @@ func Semantics(rule types.TRule) error {
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
 
-		//n := LV.LV.Type.Type.NSize
+		n := LV.LV.Type.Type.NSize
 		F.F.Type = LV.LV.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
+		fmt.Fprintf(os.Stdout, "\tDE_REF %d\n", n)
 	case types.F_1:
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -525,6 +592,8 @@ func Semantics(rule types.TRule) error {
 		F.F.Type = scope.PInt
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
+		fmt.Fprintf(os.Stdout, "\tDUP\n\tDUP\n\tDE_REF 1\n")
+		fmt.Fprintf(os.Stdout, "\tINC\n\tSTORE_REF 1\n\tDE_REF 1\n")
 	case types.F_2:
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -534,6 +603,8 @@ func Semantics(rule types.TRule) error {
 		F.F.Type = LV.LV.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
+		fmt.Fprintf(os.Stdout, "\tDUP\n\tDUP\n\tDE_REF 1\n")
+		fmt.Fprintf(os.Stdout, "\tDEC\n\tSTORE_REF 1\n\tDE_REF 1\n")
 	case types.F_3:
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -543,6 +614,9 @@ func Semantics(rule types.TRule) error {
 		F.F.Type = LV.LV.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
+		fmt.Fprintf(os.Stdout, "\tDUP\n\tDUP\n\tDE_REF 1\n")
+		fmt.Fprintf(os.Stdout, "\tINC\n\tSTORE_REF 1\n\tDE_REF 1\n")
+		fmt.Fprintf(os.Stdout, "\tDEC\n")
 	case types.F_4:
 		LV = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -552,6 +626,9 @@ func Semantics(rule types.TRule) error {
 		F.F.Type = LV.LV.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
+		fmt.Fprintf(os.Stdout, "\tDUP\n\tDUP\n\tDE_REF 1\n")
+		fmt.Fprintf(os.Stdout, "\tDEC\n\tSTORE_REF 1\n\tDE_REF 1\n")
+		fmt.Fprintf(os.Stdout, "\tINC\n")
 	case types.F_5:
 		E = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -571,10 +648,11 @@ func Semantics(rule types.TRule) error {
 				return errors.New("Too few args")
 			}
 		}
-		//f := IDU.ID.Obj
+		f := IDU.ID.Obj
 		F.F.Type = MC.MC.Type
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
+		fmt.Fprintf(os.Stdout, "\tCALL %d\n", f.Function.NIndex)
 	case types.F_7:
 		F1 = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -584,6 +662,7 @@ func Semantics(rule types.TRule) error {
 		F0.F.Type = F1.F.Type
 		F0.TypeNonTerminal = types.F_
 		stack.Push(F0)
+		fmt.Fprintf(os.Stdout, "\tNEG\n")
 	case types.F_8:
 		F1 = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -593,6 +672,7 @@ func Semantics(rule types.TRule) error {
 		F0.F.Type = F1.F.Type
 		F0.TypeNonTerminal = types.F_
 		stack.Push(F0)
+		fmt.Fprintf(os.Stdout, "\tNOT\n")
 	case types.F_9:
 		TRUE = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -600,6 +680,7 @@ func Semantics(rule types.TRule) error {
 		F.F.Type = scope.PBool
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
+		fmt.Fprintf(os.Stdout, "\tLOAD_CONST %d\n", lexical.SecundaryToken)
 	case types.F_10:
 		FALSE = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -607,6 +688,7 @@ func Semantics(rule types.TRule) error {
 		F.F.Type = scope.PBool
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
+		fmt.Fprintf(os.Stdout, "\tLOAD_CONST %d\n", lexical.SecundaryToken)
 	case types.F_11:
 		CHR = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -614,6 +696,7 @@ func Semantics(rule types.TRule) error {
 		F.F.Type = scope.PChar
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
+		fmt.Fprintf(os.Stdout, "\tLOAD_CONST %d\n", lexical.SecundaryToken)
 	case types.F_12:
 		STR = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -621,12 +704,26 @@ func Semantics(rule types.TRule) error {
 		F.F.Type = scope.PString
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
+		fmt.Fprintf(os.Stdout, "\tLOAD_CONST %d\n", lexical.SecundaryToken)
 	case types.F_13:
 		NUM = stack.Top().(types.TAttrib)
 		stack.Pop()
 
 		F.F.Type = scope.PInt
 		F.TypeNonTerminal = types.F_
+		stack.Push(F)
+		fmt.Fprintf(os.Stdout, "\tLOAD_CONST %d\n", lexical.SecundaryToken)
+	case types.F_14:
+		IDU = stack.Top().(types.TAttrib)
+		stack.Pop()
+		p := IDU.ID.Obj
+		if p.Kind != types.VAR_ && p.Kind != types.PARAM_ {
+			return errors.New("kind not var")
+		} else {
+			F.F.Type = p.Var.PType
+			n := p.Var.NIndex
+			fmt.Fprintf(os.Stdout, "\tLOAD_VAR %d\n", n)
+		}
 		stack.Push(F)
 	case types.LE_1:
 		E = stack.Top().(types.TAttrib)
@@ -699,6 +796,7 @@ func Semantics(rule types.TRule) error {
 			} else {
 				LV0.LV.Type = p.Field.PType
 				LV0.LV.Type.Type.NSize = p.Field.NSize
+				fmt.Fprintf(os.Stdout, "\tADD %d\n", p.Field.NIndex)
 			}
 		}
 
@@ -722,7 +820,8 @@ func Semantics(rule types.TRule) error {
 			LV0.LV.Type = scope.PUniversal
 		} else {
 			LV0.LV.Type = t.Array.PElemType
-			//n := t.Array.PElemType.Type.NSize
+			n := t.Array.PElemType.Type.NSize
+			fmt.Fprintf(os.Stdout, "\tMUL %d\n\tADD\n", n)
 		}
 		if !CheckTypes(E.E.Type, scope.PInt) {
 			return errors.New("Invalid index type")
@@ -743,6 +842,7 @@ func Semantics(rule types.TRule) error {
 		} else {
 			LV.LV.Type = p.Var.PType
 			LV.LV.Type.Type.NSize = p.Var.NSize
+			fmt.Fprintf(os.Stdout, "\tLOAD_REF %d\n", p.Var.NIndex)
 		}
 		LV.TypeNonTerminal = types.LV_
 
@@ -777,8 +877,9 @@ func Semantics(rule types.TRule) error {
 		f.Function.NParams = LP.NSize
 		f.Function.NVars = 0
 		CurrentFunction = f
-		stack.Push(MF)
-
+		fmt.Fprintf(os.Stdout, "BEGIN_FUNC %d, %d, %d\n", NFunc, f.Function.NParams, 0)
+		//offset, _ := Data.LexicalData.FOut.Seek(0, io.SeekCurrent)
+		//FunctionVarPos = int(offset) - 3
 	case types.MC_0:
 		IDU = stack.Top().(types.TAttrib)
 		f := IDU.ID.Obj

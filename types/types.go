@@ -93,6 +93,9 @@ const (
 	ID_
 	NF_
 	MC_
+	MT_
+	ME_
+	MW_
 )
 
 type TRule int
@@ -127,6 +130,7 @@ const (
 	F_11
 	F_12
 	F_13
+	F_14
 	FALSE_0
 	ID_0
 	IDD_0
@@ -154,7 +158,10 @@ const (
 	LV_1
 	LV_2
 	MC_0
+	ME_0
 	MF_0
+	MT_0
+	MW_0
 	NB_0
 	NF_0
 	NUM_0
@@ -170,6 +177,7 @@ const (
 	S_5
 	S_6
 	S_7
+	S_8
 	STR_0
 	T_0
 	T_1
