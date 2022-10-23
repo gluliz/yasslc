@@ -811,6 +811,10 @@ func Semantics(rule types.TRule) error {
 				return errors.New("Kind not var")
 			}
 			LV.LV.Type = scope.PUniversal
+		} else if p.Kind == types.PARAM_ {
+			LV.LV.Type = p.Param.PType
+			LV.LV.Type.Type.NSize = p.Param.NSize
+			fmt.Fprintf(os.Stdout, "\tLOAD_REF %d\n", p.Var.NIndex)
 		} else {
 			LV.LV.Type = p.Var.PType
 			LV.LV.Type.Type.NSize = p.Var.NSize
