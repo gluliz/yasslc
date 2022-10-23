@@ -371,22 +371,6 @@ func Semantics(rule types.TRule) error {
 	case types.S_6:
 	case types.S_7:
 		return nil
-	case types.S_8:
-		E = stack.Top().(types.TAttrib)
-		stack.Pop()
-		IDU = stack.Top().(types.TAttrib)
-		stack.Pop()
-		p := IDU.ID.Obj
-		if p.Kind != types.VAR_ && p.Kind != types.PARAM_ {
-			return errors.New("Kind not var")
-		} else {
-			t1 := p.Var.PType
-			t2 := E.E.Type
-			if !CheckTypes(t1, t2) {
-				return errors.New("Type mismatch")
-			}
-		}
-		fmt.Fprintf(os.Stdout, "\t\tSTORE_VAR %d\n", p.Var.NIndex)
 	case types.E_0:
 		L = stack.Top().(types.TAttrib)
 		stack.Pop()
@@ -713,18 +697,6 @@ func Semantics(rule types.TRule) error {
 		F.TypeNonTerminal = types.F_
 		stack.Push(F)
 		fmt.Fprintf(os.Stdout, "\tLOAD_CONST %d\n", lexical.SecundaryToken)
-	case types.F_14:
-		IDU = stack.Top().(types.TAttrib)
-		stack.Pop()
-		p := IDU.ID.Obj
-		if p.Kind != types.VAR_ && p.Kind != types.PARAM_ {
-			return errors.New("kind not var")
-		} else {
-			F.F.Type = p.Var.PType
-			n := p.Var.NIndex
-			fmt.Fprintf(os.Stdout, "\tLOAD_VAR %d\n", n)
-		}
-		stack.Push(F)
 	case types.LE_1:
 		E = stack.Top().(types.TAttrib)
 		stack.Pop()

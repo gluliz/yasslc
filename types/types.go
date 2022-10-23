@@ -130,7 +130,6 @@ const (
 	F_11
 	F_12
 	F_13
-	F_14
 	FALSE_0
 	ID_0
 	IDD_0
@@ -177,7 +176,6 @@ const (
 	S_5
 	S_6
 	S_7
-	S_8
 	STR_0
 	T_0
 	T_1
