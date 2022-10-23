@@ -5,7 +5,7 @@
 3,DC
 1,DE
 1,DE
-10,DF
+11,DF
 9,DT
 8,DT
 4,DT
@@ -13,6 +13,7 @@
 3,E
 3,E
 1,E
+0,EF
 1,F
 2,F
 2,F
@@ -42,6 +43,7 @@
 1,LDE
 2,LDV
 1,LDV
+0,LDV
 3,LE
 1,LE
 3,LI
