@@ -1,6 +1,12 @@
 # yasslc
 Yet another Simple Script Language Compiler
 
+### Entrega de VF 
+- Geração de código
+- O código gerado está em:
+  - out para input.ss
+  - out2 para input2.ss
+
 ### Entrega de VE
 Analisadores:
 - Sintático;
